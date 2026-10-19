@@ -120,9 +120,45 @@
   .chip.transaction{background:var(--txn-bg);color:var(--txn)}
   .chip.behavioral{background:var(--beh-bg);color:var(--beh)}
   .chip.rec{background:var(--ink);color:#fff}
-  .regen{margin-top:11px;border:1px solid var(--hair);background:var(--panel);border-radius:8px;
-    padding:7px 12px;font-size:12px;cursor:pointer;color:var(--ink-2);font-family:var(--sans)}
-  .regen:hover{border-color:var(--ink-2)}
+  .subj .sl .why .mono{font-family:var(--mono);font-size:11px}
+  .subj .sl .flag{color:var(--txn)}
+  .ground{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.5}
+
+  /* AI controls */
+  .card-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .card .card-head h2{margin:0}
+  .src-badge{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+    padding:3px 7px;border-radius:5px;background:var(--panel-2);border:1px solid var(--hair);color:var(--muted);white-space:nowrap}
+  .src-badge.ai{background:var(--beh-bg);color:var(--beh);border-color:transparent}
+  .src-badge.warn{background:var(--txn-bg);color:var(--txn);border-color:transparent}
+  .ai-row{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+  .ai-btn{border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:8px;padding:8px 13px;
+    font-size:12.5px;font-weight:500;cursor:pointer;font-family:var(--sans)}
+  .ai-btn:hover{background:var(--ink-2)}
+  .ai-btn:disabled{opacity:.55;cursor:progress}
+  .ghost-btn{border:1px solid var(--hair);background:var(--panel);border-radius:8px;padding:8px 12px;
+    font-size:12.5px;cursor:pointer;color:var(--ink-2);font-family:var(--sans)}
+  .ghost-btn:hover{border-color:var(--ink-2)}
+  .ai-status{font-size:12px;color:var(--muted)}
+  .ai-status.err{color:var(--neg)}
+  button:focus-visible,.obj button:focus-visible,.sig .row:focus-visible{outline:2px solid var(--beh);outline-offset:2px}
+
+  /* planner report */
+  .report-body p{font-size:13.5px;color:var(--ink-2);margin:0 0 8px}
+  .report-body p.empty{color:var(--muted);font-size:13px}
+  .report-body .rep-head{font-size:15.5px;font-weight:600;color:var(--ink);line-height:1.4}
+  .rep-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+  .rep-block{border-top:1px solid var(--hair);padding-top:10px}
+  .rep-block h3{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 6px;font-weight:500}
+  .rep-block.team h3{color:var(--ink)}
+  .rep-block ul{margin:0;padding-left:18px;font-size:13px;color:var(--ink-2)}
+  .rep-block li{margin:4px 0}
+  .rep-meta{margin-top:14px;padding-top:10px;border-top:1px solid var(--hair);font-size:11.5px;color:var(--muted);
+    display:flex;gap:6px 14px;flex-wrap:wrap}
+  .rep-meta .ok{color:var(--rev)}
+  .rep-meta .warnc{color:var(--txn)}
+  .stale-banner{background:var(--txn-bg);color:#7A4B05;border-radius:8px;padding:8px 11px;font-size:12.5px;margin-bottom:12px}
+  @media(max-width:720px){.rep-grid{grid-template-columns:1fr}}
 
   .two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
   @media(max-width:720px){.two{grid-template-columns:1fr}}
@@ -204,9 +240,12 @@
       </section>
 
       <section class="panel card">
-        <h2>Suggested subject lines</h2>
+        <div class="card-head"><h2>Suggested subject lines</h2><span class="src-badge" id="subjSrc">Rule-based draft</span></div>
         <div class="subj" id="subj"></div>
-        <button class="regen" id="regen">↻ Regenerate variants</button>
+        <div class="ai-row">
+          <button class="ai-btn" id="genSubj" type="button">Generate with AI</button>
+          <span class="ai-status" id="subjStatus" role="status" aria-live="polite"></span>
+        </div>
       </section>
 
       <div class="two">
@@ -221,14 +260,24 @@
       </div>
 
       <section class="panel card">
-        <h2>Agent reasoning · grounded in active signals</h2>
+        <h2>Calculation trace · how the numbers were built</h2>
         <div class="trace" id="trace"></div>
+      </section>
+
+      <section class="panel card">
+        <div class="card-head"><h2>Planner report · for campaign management &amp; activation</h2><span class="src-badge" id="repSrc">Not written yet</span></div>
+        <div class="report-body" id="reportBody"></div>
+        <div class="ai-row">
+          <button class="ai-btn" id="genReport" type="button">Write report with AI</button>
+          <button class="ghost-btn" id="copyReport" type="button" hidden>Copy report</button>
+          <span class="ai-status" id="repStatus" role="status" aria-live="polite"></span>
+        </div>
       </section>
     </main>
   </div>
 
   <footer class="note">
-    Benchmarks (open, click, conversion, per-message costs) are illustrative defaults for the concept. In production these bind to live customer segments and historical campaign actuals. &nbsp;·&nbsp; Nothing here auto-sends — every plan needs marketer approval.
+    Benchmarks (open, click, conversion, per-message costs) are illustrative defaults for the concept. In production these bind to live customer segments and historical campaign actuals. &nbsp;·&nbsp; AI subject lines and reports are checked against brand rules and the plan's figures, but still need human review. Harbor &amp; Pine is a fictional brand. &nbsp;·&nbsp; Nothing here auto-sends — every plan needs marketer approval.
   </footer>
 </div>
 
@@ -399,16 +448,11 @@ function render(){
   mBuild.textContent = money(r.buildCost);
   mRun.textContent = money(r.runCost);
   mRoas.textContent = r.roas.toFixed(1)+"×";
-  mNet.textContent = "net "+moneyK(r.net);
+  mNet.textContent = "net "+money(r.net);
   mNet.style.color = r.net>=0 ? "var(--rev)" : "var(--neg)";
 
-  // subject lines
-  const lines=subjectLines(s);
-  subj.innerHTML = lines.map(x=>
-    `<div class="sl ${x.pick?'pick':''}">
-       <div class="line">${x.line}</div>
-       <div class="why">${x.pick?'<span class="chip rec">recommended</span>':''}${x.src?`<span class="chip ${x.src}">${x.src}</span>`:''}${x.why}</div>
-     </div>`).join("");
+  // subject lines (AI lines when fresh, otherwise rule-based drafts)
+  renderSubjects(s);
 
   // build
   build.innerHTML =
@@ -429,6 +473,9 @@ function render(){
   // trace
   trace_el.innerHTML = trace(s,r).map(st=>
     `<div class="step" data-k="${st.k}"><div class="mk"></div><div class="tx">${st.html}</div></div>`).join("");
+
+  // planner report
+  renderReport();
 }
 
 function segmentName(s){
@@ -443,10 +490,168 @@ function cadence(s){
   return {winback:"3 touches, spaced",crosssell:"2 touches",launch:"launch + 2 reminders",seasonal:"teaser + open + last-call",vip:"1 touch, high-value"}[s.obj];
 }
 
+/* ---------- AI layer ----------
+   The page never holds an API key. It calls the Signal Desk Worker (worker.js), which holds
+   the key, validates input, calls the model and checks the output.
+   Paste your Worker URL here, e.g. "https://signal-desk-api.yourname.workers.dev" */
+const API_BASE = "";
+
+const ai = { subj:null, subjSig:null, subjErr:null, subjBusy:false,
+             rep:null, repSig:null, repErr:null, repBusy:false, repNote:null };
+const planSig = () => JSON.stringify([state.obj, state.vol, state.ds]);
+const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const clock = iso => { const d=new Date(iso); return isNaN(d) ? "" : d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}); };
+
+function setStatus(id, text, isErr){
+  const el=document.getElementById(id);
+  el.textContent = text || "";
+  el.classList.toggle("err", Boolean(isErr));
+}
+function setBadge(id, text, kind){
+  const el=document.getElementById(id);
+  el.textContent = text;
+  el.className = "src-badge" + (kind ? " "+kind : "");
+}
+
+async function callApi(path, payload){
+  if(!API_BASE) throw new Error("AI isn't connected yet. Add your Worker URL to API_BASE in index.html.");
+  const ctrl=new AbortController(); const timer=setTimeout(()=>ctrl.abort(), 30000);
+  let res;
+  try{
+    res = await fetch(API_BASE.replace(/\/$/,"") + path, {
+      method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload), signal:ctrl.signal });
+  }catch(e){
+    throw new Error(e.name==="AbortError" ? "The AI service took too long. Try again."
+      : "Couldn't reach the AI service. Check API_BASE and the Worker's ALLOWED_ORIGINS setting.");
+  }finally{ clearTimeout(timer); }
+  let data={};
+  try{ data = await res.json(); }catch(_){}
+  if(!res.ok) throw new Error(data.error || `The AI service returned an error (${res.status}).`);
+  return data;
+}
+
+/* subject lines */
+function renderSubjects(s){
+  const fresh = ai.subj && ai.subjSig === planSig();
+  const subjEl = document.getElementById("subj");
+  if(fresh){
+    const d = ai.subj;
+    setBadge("subjSrc", "AI · brand-checked", "ai");
+    subjEl.innerHTML = d.lines.map((l,i)=>
+      `<div class="sl ${i===d.recommended?'pick':''}">
+         <div class="line">${esc(l.text)}</div>
+         <div class="why">${i===d.recommended?'<span class="chip rec">recommended</span>':''}${l.signal?`<span class="chip ${esc(l.signal)}">${esc(l.signal)}</span>`:''}${esc(l.angle)} · <span class="mono">${Number(l.chars)||0} chars</span>${(l.flags||[]).map(f=>` · <span class="flag">${esc(f)}</span>`).join("")}</div>
+       </div>`).join("") +
+      `<div class="ground">Written for ${esc(d.brand)} · Offer: ${esc(d.offer)}${d.why?` · Why the pick: ${esc(d.why)}`:""}${d.rejected?` · ${Number(d.rejected)} draft${d.rejected>1?"s":""} blocked by brand checks`:""}</div>`;
+  } else {
+    setBadge("subjSrc", "Rule-based draft");
+    subjEl.innerHTML = subjectLines(s).map(x=>
+      `<div class="sl ${x.pick?'pick':''}">
+         <div class="line">${x.line}</div>
+         <div class="why">${x.pick?'<span class="chip rec">recommended</span>':''}${x.src?`<span class="chip ${x.src}">${x.src}</span>`:''}${x.why}</div>
+       </div>`).join("");
+  }
+  const btn=document.getElementById("genSubj");
+  btn.disabled = ai.subjBusy;
+  btn.textContent = fresh ? "Generate new AI lines" : "Generate with AI";
+  if(ai.subjBusy) setStatus("subjStatus", "Writing subject lines…");
+  else if(ai.subjErr) setStatus("subjStatus", ai.subjErr, true);
+  else if(ai.subj && !fresh) setStatus("subjStatus", "The plan changed, so these are rule-based drafts again. Generate to refresh the AI lines.");
+  else if(fresh) setStatus("subjStatus", `Generated ${clock(ai.subj.generatedAt)} · ${ai.subj.model}`);
+  else setStatus("subjStatus", "");
+}
+
+async function generateSubjects(){
+  if(ai.subjBusy) return;
+  ai.subjBusy=true; ai.subjErr=null; render();
+  const sigAtStart=planSig();
+  try{
+    const data = await callApi("/subjects", { objective:state.obj, datasets:state.ds });
+    ai.subj=data; ai.subjSig=sigAtStart;
+  }catch(e){ ai.subjErr=e.message; }
+  finally{ ai.subjBusy=false; render(); }
+}
+
+/* planner report */
+function reportPayload(){
+  const r=compute(state);
+  return {
+    objective:state.obj, datasets:state.ds, volume:state.vol,
+    channels:r.chans, sendWindow:timing(state).window.v, confidence:confName(r.nDs),
+    metrics:{ reached:r.reached, opens:r.opens, clicks:r.clicks, conversions:r.conv,
+      openRate:r.OR, clickRate:r.CTR, convRate:r.CVR, aov:r.aov, revenue:r.revenue,
+      buildCost:r.buildCost, runCost:r.runCost }
+  };
+}
+
+function renderReport(){
+  const body=document.getElementById("reportBody");
+  const copyBtn=document.getElementById("copyReport");
+  const btn=document.getElementById("genReport");
+  btn.disabled = ai.repBusy;
+  if(!ai.rep){
+    setBadge("repSrc", "Not written yet");
+    body.innerHTML = `<p class="empty">Turns this plan into a short, plain-language brief, with next steps for the campaign management team and the activation team. The numbers stay with the planner; the AI only explains them.</p>`;
+    copyBtn.hidden=true;
+    btn.textContent="Write report with AI";
+  } else {
+    const r=ai.rep, stale = ai.repSig !== planSig(), g=r.grounding||{checked:0,unmatched:[]};
+    const block=(title, items, cls) => items && items.length
+      ? `<div class="rep-block ${cls||""}"><h3>${title}</h3><ul>${items.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>` : "";
+    const gline = g.unmatched.length
+      ? `<span class="warnc">⚠ ${g.unmatched.length} figure${g.unmatched.length>1?"s":""} not found in the plan: ${esc(g.unmatched.join(", "))}. Check before sharing.</span>`
+      : g.checked ? `<span class="ok">✓ All ${g.checked} figures match the plan</span>` : `<span>No figures to check</span>`;
+    body.innerHTML =
+      (stale ? `<div class="stale-banner">This report describes an earlier version of the plan. Write it again before sharing.</div>` : "") +
+      `<p class="rep-head">${esc(r.headline)}</p><p>${esc(r.summary)}</p>
+       <div class="rep-grid">
+         ${block("What's shaping this plan", r.drivers)}
+         ${block("Risks to watch", r.risks)}
+         ${block("Next steps · campaign management", r.next_steps_campaign, "team")}
+         ${block("Next steps · activation", r.next_steps_activation, "team")}
+       </div>
+       <div class="rep-meta">${gline}<span>AI-written from the planner's figures · ${esc(r.model)} · ${clock(r.generatedAt)}</span></div>`;
+    setBadge("repSrc", stale ? "Out of date" : (g.unmatched.length ? "AI · check figures" : "AI · figures checked"), stale || g.unmatched.length ? "warn" : "ai");
+    copyBtn.hidden = stale;
+    btn.textContent = "Write again";
+  }
+  if(ai.repBusy) setStatus("repStatus", "Writing the report…");
+  else if(ai.repErr) setStatus("repStatus", ai.repErr, true);
+  else setStatus("repStatus", ai.repNote || "");
+}
+
+async function generateReport(){
+  if(ai.repBusy) return;
+  ai.repBusy=true; ai.repErr=null; ai.repNote=null; render();
+  const sigAtStart=planSig();
+  try{
+    const data = await callApi("/report", reportPayload());
+    ai.rep=data; ai.repSig=sigAtStart;
+  }catch(e){ ai.repErr=e.message; }
+  finally{ ai.repBusy=false; render(); }
+}
+
+function reportAsText(){
+  const r=ai.rep; const o=OBJ[state.obj];
+  const list=(t,items)=> items&&items.length ? `\n${t}\n${items.map(x=>"- "+x).join("\n")}\n` : "";
+  return `Signal Desk planner report: ${o.label}\n\n${r.headline}\n\n${r.summary}\n` +
+    list("What's shaping this plan", r.drivers) + list("Risks to watch", r.risks) +
+    list("Next steps: campaign management", r.next_steps_campaign) +
+    list("Next steps: activation", r.next_steps_activation) +
+    `\nAI-written from the planner's modeled figures. Review before acting.`;
+}
+
+async function copyReport(){
+  try{ await navigator.clipboard.writeText(reportAsText()); ai.repNote="Copied to clipboard."; }
+  catch(_){ ai.repNote="Couldn't copy automatically. Select the report text instead."; }
+  render();
+}
+
 /* ---------- events ---------- */
+function planChanged(){ ai.subjErr=null; ai.repErr=null; ai.repNote=null; render(); }
 document.getElementById("objList").addEventListener("click",e=>{
   const b=e.target.closest("[data-obj]"); if(!b)return;
-  state.obj=b.dataset.obj; render();
+  state.obj=b.dataset.obj; planChanged();
 });
 document.getElementById("sigList").addEventListener("click",e=>{
   const row=e.target.closest(".row"); if(!row)return; toggle(row.dataset.k);
@@ -455,9 +660,11 @@ document.getElementById("sigList").addEventListener("keydown",e=>{
   const row=e.target.closest(".row"); if(!row)return;
   if(e.key==="Enter"||e.key===" "){e.preventDefault();toggle(row.dataset.k);}
 });
-function toggle(k){ state.ds[k]=!state.ds[k]; render(); }
-document.getElementById("vol").addEventListener("input",e=>{ state.vol=+e.target.value; render(); });
-document.getElementById("regen").addEventListener("click",()=>{ state.seed++; render(); });
+function toggle(k){ state.ds[k]=!state.ds[k]; planChanged(); }
+document.getElementById("vol").addEventListener("input",e=>{ state.vol=+e.target.value; planChanged(); });
+document.getElementById("genSubj").addEventListener("click", generateSubjects);
+document.getElementById("genReport").addEventListener("click", generateReport);
+document.getElementById("copyReport").addEventListener("click", copyReport);
 
 // element aliases that clash with reserved-ish names
 const timing_el=document.getElementById("timing");
